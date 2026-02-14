@@ -1,3 +1,7 @@
+import { inject } from "@vercel/analytics"
+
+inject();
+
 import { SaveFileProvider } from './contexts/SaveFileContext';
 import FileUpload from './components/FileUpload';
 import DataDisplay from './components/DataDisplay';
