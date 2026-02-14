@@ -1,4 +1,3 @@
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ProcessedArmyUnit } from '../types';
 
 interface ArmyCompositionProps {
@@ -7,16 +6,17 @@ interface ArmyCompositionProps {
 
 export default function ArmyComposition({ data }: ArmyCompositionProps) {
   return (
-    <ResponsiveContainer width="100%" height={300}>
-      <BarChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
-        <YAxis />
-        <Tooltip />
-        <Legend />
-        <Bar dataKey="home" name="Home" stackId="a" fill="#0088FE" />
-        <Bar dataKey="away" name="Away" stackId="a" fill="#FF8042" />
-      </BarChart>
-    </ResponsiveContainer>
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {data.map((unit) => (
+        <div key={unit.id} className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+          <div className="font-semibold text-gray-800 dark:text-gray-200">
+            {unit.name}
+          </div>
+          <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">
+            {unit.total.toLocaleString()}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
