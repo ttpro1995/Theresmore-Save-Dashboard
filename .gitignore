@@ -1,2 +1,3 @@
 node_modules
 dist
+example-data/data.dump.js

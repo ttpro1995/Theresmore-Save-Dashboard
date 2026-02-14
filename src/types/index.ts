@@ -1,7 +1,114 @@
 // Save file data types
 
-export interface SaveFileData {
+// The save file is an array with elements:
+// [version, mappings, gameData, rewards, stats, legacies, ...]
+export type SaveFileData = [
+  string,              // Version number (e.g., "0.63")
+  unknown,             // Index mappings
+  GameDataSection,     // Main game data object (resources, buildings, techs, etc.)
+  BuildingRecord[],    // Building/achievement construction history
+  Statistic[],         // Player statistics
+  LegacyRecord[],     // Unlocked legacies
+  ...unknown[]        // Additional data
+];
+
+// Game data section (second element of save array)
+export interface GameDataSection {
+  caps?: Record<string, number>;
+  resources?: Record<string, number>;
+  buildings?: Record<string, number>;
+  population?: Record<string, number>;
+  techs?: Record<string, number>;
+  modifiers?: Record<string, number>;
+  factions?: Record<string, number>;
+  armyCards?: Record<string, number>;
+  items?: Record<string, number>;
+  prayers?: Record<string, number>;
+  quests?: Record<string, number>;
+  spellsIndex?: Record<string, number>;
+  monsters?: Record<string, number>;
+  enemies?: Record<string, number>;
+  achievements?: Record<string, number>;
+  armies?: any;  // Army composition data
+  resourcesValues?: any[];
+  buildingsValues?: any[];
+  techsValues?: any[];
+  modifiersValues?: any[];
+  factionsValues?: any[];
+  questsValues?: any[];
+  prayersValues?: any[];
+  spells?: string[];
+  rewards?: any[];
+  flag?: number;
+  flagb?: number;
+  flagd?: number;
+  dfc?: number;
+  boss?: string;
+  donation?: number;
   [key: string]: unknown;
+}
+
+// Building history record
+export interface BuildingRecord {
+  id: string;
+  parent: string;
+  date: number;  // Unix timestamp
+}
+
+// Player statistic
+export interface Statistic {
+  id: string;
+  value: number;
+}
+
+// Item history record
+export interface ItemRecord {
+  id: string;
+  date: number;  // Unix timestamp
+}
+
+// Legacy record (unlocked legacies)
+export interface LegacyRecord {
+  id: string;
+  date: number;  // Unix timestamp
+}
+
+// Battle log record
+export interface BattleRecord {
+  id: string;
+  timestamp: number;  // Unix timestamp
+  enemyName: string;
+  enemyId: string;
+  fightType: 'attack' | 'defense';
+  victory: 0 | 1;  // 0 = defeat, 1 = victory
+  rounds: number;  // Number of rounds fought
+  summary: {
+    armyCasualties: number;
+    enemyCasualties: number;
+    armyLosses: Record<string, number>;  // Unit type to count
+    enemyLosses: Record<string, number>;  // Unit type to count
+    splashUnits: number;
+    trampleUnits: number;
+  };
+  statistics: {
+    totalDamageDealt: number;
+    splashDamage: number;
+    trampleDamage: number;
+    bonusDamage: number;
+    attackBreakdown: {
+      normal: number;
+      splash: number;
+      trample: number;
+    };
+    topDamageDealer: {
+      unit: string;
+      damage: number;
+    };
+    combatEventsCount: number;
+    detailedRounds: number;
+  };
+  detailedLog: string[];  // Round-by-round combat description
+  starred: boolean;  // Whether battle is marked as important
 }
 
 export interface SaveFileState {
@@ -28,4 +135,158 @@ export interface AppSettings {
   viewMode: ViewMode;
   autoDecode: boolean;
   theme: 'light' | 'dark';
+}
+
+// Game-specific data types
+export interface GameData {
+  version: string;
+  caps: CapEntry[];
+  resources: ResourceEntry[];
+  buildings: BuildingEntry[];
+  population: PopulationEntry[];
+  techs: TechEntry[];
+  modifiers: ModifierEntry[];
+  army: ArmyEntry[];
+  armyOrder: ArmyOrder;
+  enemies: EnemyEntry[];
+  diplomacy: DiplomacyEntry[];
+  stocks: StockEntry[];
+  prayers: PrayerEntry[];
+  spells: string[];
+  rewards: RewardEntry[];
+  flag: number;
+  flagb: number;
+  flagd: number;
+  dfc: number;
+  boss: string;
+  donation: number;
+}
+
+export interface CapEntry {
+  id: string;
+  value: number;
+}
+
+export interface ResourceEntry {
+  id: string;
+  value: number;
+  manual: number;
+  timer: number;
+  timern: number;
+  perc: number;
+}
+
+export interface BuildingEntry {
+  id: string;
+  value: number;
+}
+
+export interface PopulationEntry {
+  id: string;
+  value: number;
+}
+
+export interface TechEntry {
+  id: string;
+  value: number;
+}
+
+export interface ModifierEntry {
+  id: string;
+  type: string;
+  mods: Modification[];
+}
+
+export interface Modification {
+  typeOrig?: string;
+  idOrig?: string;
+  type: string;
+  id: string;
+  value: number;
+  perc: boolean;
+}
+
+export interface ArmyEntry {
+  id: string;
+  value: number;
+  away: number;
+}
+
+export interface ArmyOrder {
+  away: string[];
+  defense: string[];
+}
+
+export interface EnemyEntry {
+  id: string;
+  owned: number;
+  log: string;
+}
+
+export interface StockEntry {
+  id: string;
+  sell_min: number;
+  sell_max: number;
+  sell_duration: number;
+  buy_min: number;
+  buy_max: number;
+  buy_duration: number;
+}
+
+export interface PrayerEntry {
+  id: string;
+  value: number;
+}
+
+export interface RewardEntry {
+  // Definition needed
+}
+
+export interface DiplomacyEntry {
+  // Definition needed
+}
+
+// Processed data types for visualization
+export interface ProcessedResource {
+  id: string;
+  name: string;
+  value: number;
+  production: number;
+  consumption: number;
+  percentage: number;
+  cap: number;
+}
+
+export interface ProcessedPopulation {
+  id: string;
+  name: string;
+  count: number;
+  capacity: number;
+  percentage: number;
+}
+
+export interface ProcessedBuilding {
+  id: string;
+  name: string;
+  count: number;
+}
+
+export interface ProcessedTechnology {
+  id: string;
+  name: string;
+  researched: boolean;
+}
+
+export interface ProcessedLegacy {
+  id: string;
+  name: string;
+  date: number;
+}
+
+export interface ProcessedArmyUnit {
+  id: string;
+  name: string;
+  total: number;
+  away: number;
+  home: number;
 }

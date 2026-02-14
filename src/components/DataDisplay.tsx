@@ -1,13 +1,62 @@
 import { useMemo } from 'react';
 import { useSaveFile } from '../contexts/SaveFileContext';
 import { PieChart, Pie, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
+import ResourcesChart from './ResourcesChart';
+import PopulationChart from './PopulationChart';
+import BuildingsChart from './BuildingsChart';
+import TechnologiesGrid from './TechnologiesGrid';
+import ArmyComposition from './ArmyComposition';
+import { extractResources, extractPopulation, extractBuildings, extractTechnologies, extractArmy, extractLegacies } from '../utils/dataExtractors';
+import { GameDataSection, SaveFileData } from '../types';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
 export default function DataDisplay() {
   const { state, settings } = useSaveFile();
 
-  // Extract numeric data for visualization
+  // Extract game data from the save file array structure
+  const gameData = useMemo(() => {
+    const parsed = state.parsed as SaveFileData | null;
+    if (!parsed || !Array.isArray(parsed) || parsed.length < 3) return null;
+    // Based on decoded data structure: [version, mappings, gameData, rewards, stats, legacies]
+    // The game data is the third element (index 2) of the save file array
+    return parsed[2] as GameDataSection;
+  }, [state.parsed]);
+
+  // Extract legacies from the save file (index 5 based on decoded data structure)
+  const legaciesData = useMemo(() => {
+    const parsed = state.parsed as SaveFileData | null;
+    if (!parsed || !Array.isArray(parsed) || parsed.length < 6) return [];
+    return extractLegacies(parsed[5] as any);
+  }, [state.parsed]);
+
+  // Extract game-specific data for visualization
+  const resourcesData = useMemo(() => {
+    if (!gameData || !gameData.resources) return [];
+    return extractResources(gameData);
+  }, [gameData]);
+
+  const populationData = useMemo(() => {
+    if (!gameData || !gameData.population) return [];
+    return extractPopulation(gameData);
+  }, [gameData]);
+
+  const buildingsData = useMemo(() => {
+    if (!gameData || !gameData.buildings) return [];
+    return extractBuildings(gameData);
+  }, [gameData]);
+
+  const technologiesData = useMemo(() => {
+    if (!gameData || !gameData.techs) return [];
+    return extractTechnologies(gameData);
+  }, [gameData]);
+
+  const armyData = useMemo(() => {
+    if (!gameData || !gameData.army) return [];
+    return extractArmy(gameData);
+  }, [gameData]);
+
+  // Extract numeric data for visualization (fallback)
   const numericData = useMemo(() => {
     if (!state.parsed) return [];
     
@@ -32,7 +81,7 @@ export default function DataDisplay() {
     }
     
     extractNumbers(state.parsed);
-    return data.slice(0, 20); // Limit to first 20 for readability
+    return data.slice(0, 20);
   }, [state.parsed]);
 
   // Get key types distribution
@@ -211,71 +260,155 @@ export default function DataDisplay() {
         </div>
       )}
 
-      {/* Visualization */}
-      {settings.viewMode === 'visualization' && (
-        <div>
-          <h2 className="text-lg font-medium mb-4 text-gray-900 dark:text-white">
-            Data Visualization
-          </h2>
-          
-          {numericData.length > 0 || typeDistribution.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Type Distribution Pie Chart */}
-              {typeDistribution.length > 0 && (
-                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-                  <h3 className="text-sm font-medium mb-4 text-gray-700 dark:text-gray-300">
-                    Data Types Distribution
-                  </h3>
-                  <ResponsiveContainer width="100%" height={250}>
-                    <PieChart>
-                      <Pie
-                        data={typeDistribution}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {typeDistribution.map((_, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
+      {/* Game Visualization */}
+      {settings.viewMode === 'visualization' && gameData && (
+        <div className="space-y-8">
+          {/* Resources Section */}
+          {resourcesData.length > 0 && (
+            <section className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+                Resources
+              </h2>
+              <ResourcesChart data={resourcesData} />
+            </section>
+          )}
 
-              {/* Numeric Values Bar Chart */}
-              {numericData.length > 0 && (
-                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-                  <h3 className="text-sm font-medium mb-4 text-gray-700 dark:text-gray-300">
-                    Numeric Values (Top 20)
-                  </h3>
-                  <ResponsiveContainer width="100%" height={250}>
-                    <BarChart data={numericData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
-                        dataKey="name" 
-                        tick={{ fontSize: 10 }} 
-                        angle={-45}
-                        textAnchor="end"
-                        height={80}
-                      />
-                      <YAxis tick={{ fontSize: 10 }} />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="value" fill="#8884d8" />
-                    </BarChart>
-                  </ResponsiveContainer>
+          {/* Population Section */}
+          {populationData.length > 0 && (
+            <section className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+                Population Distribution
+              </h2>
+              <PopulationChart data={populationData} />
+            </section>
+          )}
+
+          {/* Buildings Section */}
+          {buildingsData.length > 0 && (
+            <section className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+                Top Buildings
+              </h2>
+              <BuildingsChart data={buildingsData} />
+            </section>
+          )}
+
+          {/* Army Section */}
+          {armyData.length > 0 && (
+            <section className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+                Army Composition
+              </h2>
+              <ArmyComposition data={armyData} />
+            </section>
+          )}
+
+          {/* Technologies Section */}
+          {technologiesData.length > 0 && (
+            <section className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+                Technologies
+              </h2>
+              <TechnologiesGrid data={technologiesData} />
+            </section>
+          )}
+
+          {/* Legacies Section */}
+          {legaciesData.length > 0 && (
+            <section className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+                Unlocked Legacies ({legaciesData.length})
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {legaciesData.map((legacy) => (
+                  <div 
+                    key={legacy.id} 
+                    className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4"
+                  >
+                    <div className="flex items-center gap-2">
+                      <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span className="font-medium text-green-900 dark:text-green-100">{legacy.name}</span>
+                    </div>
+                    <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                      Unlocked: {new Date(legacy.date).toLocaleDateString()}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Fallback visualization if no game data */}
+          {(resourcesData.length === 0 && populationData.length === 0 && 
+            buildingsData.length === 0 && technologiesData.length === 0 && 
+            armyData.length === 0) && (
+            <div className="space-y-6">
+              <h2 className="text-lg font-medium mb-4 text-gray-900 dark:text-white">
+                Data Visualization
+              </h2>
+              
+              {numericData.length > 0 || typeDistribution.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Type Distribution Pie Chart */}
+                  {typeDistribution.length > 0 && (
+                    <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+                      <h3 className="text-sm font-medium mb-4 text-gray-700 dark:text-gray-300">
+                        Data Types Distribution
+                      </h3>
+                      <ResponsiveContainer width="100%" height={250}>
+                        <PieChart>
+                          <Pie
+                            data={typeDistribution}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="value"
+                          >
+                            {typeDistribution.map((_, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
+
+                  {/* Numeric Values Bar Chart */}
+                  {numericData.length > 0 && (
+                    <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+                      <h3 className="text-sm font-medium mb-4 text-gray-700 dark:text-gray-300">
+                        Numeric Values (Top 20)
+                      </h3>
+                      <ResponsiveContainer width="100%" height={250}>
+                        <BarChart data={numericData}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis 
+                            dataKey="name" 
+                            tick={{ fontSize: 10 }} 
+                            angle={-45}
+                            textAnchor="end"
+                            height={80}
+                          />
+                          <YAxis tick={{ fontSize: 10 }} />
+                          <Tooltip />
+                          <Legend />
+                          <Bar dataKey="value" fill="#8884d8" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  No numeric data available for visualization.
                 </div>
               )}
-            </div>
-          ) : (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-              No numeric data available for visualization.
             </div>
           )}
         </div>
