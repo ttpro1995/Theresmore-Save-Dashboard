@@ -1,41 +1,43 @@
 // Save file data types
 
-// The save file is an array: [version, indexMappings, gameData]
-export type SaveFileData = [string, IndexMappings, GameDataSection];
+// The save file is an array with 7 elements
+export type SaveFileData = [
+  string,              // Version number (e.g., "0.63")
+  GameDataSection,     // Main game data object
+  BuildingRecord[],    // Building construction history
+  Statistic[],         // Player statistics
+  ItemRecord[],        // Item acquisition history
+  BattleRecord[],      // Combat history log
+  unknown              // Additional data (type varies)
+];
 
-// Index mappings (second element of save array)
-export interface IndexMappings {
+// Game data section (second element of save array)
+export interface GameDataSection {
   caps?: Record<string, number>;
   resources?: Record<string, number>;
   buildings?: Record<string, number>;
   population?: Record<string, number>;
   techs?: Record<string, number>;
   modifiers?: Record<string, number>;
-  army?: Record<string, number>;
+  factions?: Record<string, number>;
+  armyCards?: Record<string, number>;
+  items?: Record<string, number>;
   prayers?: Record<string, number>;
-  [key: string]: Record<string, number> | undefined;
-}
-
-// Game data section (third element of save array)
-export interface GameDataSection {
-  race?: string;
-  ancestors?: string;
-  enemy?: string;
-  spy?: string;
-  caps?: CapEntry[];
-  resources?: ResourceEntry[];
-  buildings?: BuildingEntry[];
-  population?: PopulationEntry[];
-  techs?: TechEntry[];
-  modifiers?: ModifierEntry[];
-  army?: ArmyEntry[];
-  armyOrder?: ArmyOrder;
-  enemies?: EnemyEntry[];
-  diplomacy?: DiplomacyEntry[];
-  stocks?: StockEntry[];
-  prayers?: PrayerEntry[];
+  quests?: Record<string, number>;
+  spellsIndex?: Record<string, number>;
+  monsters?: Record<string, number>;
+  enemies?: Record<string, number>;
+  achievements?: Record<string, number>;
+  armies?: any;  // Army composition data
+  resourcesValues?: any[];
+  buildingsValues?: any[];
+  techsValues?: any[];
+  modifiersValues?: any[];
+  factionsValues?: any[];
+  questsValues?: any[];
+  prayersValues?: any[];
   spells?: string[];
-  rewards?: RewardEntry[];
+  rewards?: any[];
   flag?: number;
   flagb?: number;
   flagd?: number;
@@ -43,6 +45,63 @@ export interface GameDataSection {
   boss?: string;
   donation?: number;
   [key: string]: unknown;
+}
+
+// Building history record
+export interface BuildingRecord {
+  id: string;
+  parent: string;
+  date: number;  // Unix timestamp
+}
+
+// Player statistic
+export interface Statistic {
+  id: string;
+  value: number;
+}
+
+// Item history record
+export interface ItemRecord {
+  id: string;
+  date: number;  // Unix timestamp
+}
+
+// Battle log record
+export interface BattleRecord {
+  id: string;
+  timestamp: number;  // Unix timestamp
+  enemyName: string;
+  enemyId: string;
+  fightType: 'attack' | 'defense';
+  victory: 0 | 1;  // 0 = defeat, 1 = victory
+  rounds: number;  // Number of rounds fought
+  summary: {
+    armyCasualties: number;
+    enemyCasualties: number;
+    armyLosses: Record<string, number>;  // Unit type to count
+    enemyLosses: Record<string, number>;  // Unit type to count
+    splashUnits: number;
+    trampleUnits: number;
+  };
+  statistics: {
+    totalDamageDealt: number;
+    splashDamage: number;
+    trampleDamage: number;
+    bonusDamage: number;
+    attackBreakdown: {
+      normal: number;
+      splash: number;
+      trample: number;
+    };
+    topDamageDealer: {
+      unit: string;
+      damage: number;
+    };
+    combatEventsCount: number;
+    detailedRounds: number;
+  };
+  detailedLog: string[];  // Round-by-round combat description
+  starred: boolean;  // Whether battle is marked as important
 }
 
 export interface SaveFileState {
