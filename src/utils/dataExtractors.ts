@@ -10,13 +10,23 @@ import {
 // Extract resources with production/consumption data
 export function extractResources(data: GameDataSection): ProcessedResource[] {
   if (!data.resources || !Array.isArray(data.resources)) return [];
+  
+  // Get capacity from caps if available
+  const capsMap: Record<string, number> = {};
+  if (data.caps && Array.isArray(data.caps)) {
+    data.caps.forEach(cap => {
+      capsMap[cap.id] = cap.value;
+    });
+  }
+  
   return data.resources.map(resource => ({
     id: resource.id,
     name: formatResourceName(resource.id),
     value: resource.value,
     production: calculateProduction(resource),
     consumption: calculateConsumption(resource),
-    percentage: resource.perc || 0
+    percentage: resource.perc || 0,
+    cap: capsMap[resource.id] || 0
   }));
 }
 

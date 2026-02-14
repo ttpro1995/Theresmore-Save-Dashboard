@@ -247,6 +247,7 @@ export interface ProcessedResource {
   production: number;
   consumption: number;
   percentage: number;
+  cap: number;
 }
 
 export interface ProcessedPopulation {
