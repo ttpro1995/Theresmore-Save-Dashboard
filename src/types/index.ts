@@ -1,6 +1,47 @@
 // Save file data types
 
-export interface SaveFileData {
+// The save file is an array: [version, indexMappings, gameData]
+export type SaveFileData = [string, IndexMappings, GameDataSection];
+
+// Index mappings (second element of save array)
+export interface IndexMappings {
+  caps?: Record<string, number>;
+  resources?: Record<string, number>;
+  buildings?: Record<string, number>;
+  population?: Record<string, number>;
+  techs?: Record<string, number>;
+  modifiers?: Record<string, number>;
+  army?: Record<string, number>;
+  prayers?: Record<string, number>;
+  [key: string]: Record<string, number> | undefined;
+}
+
+// Game data section (third element of save array)
+export interface GameDataSection {
+  race?: string;
+  ancestors?: string;
+  enemy?: string;
+  spy?: string;
+  caps?: CapEntry[];
+  resources?: ResourceEntry[];
+  buildings?: BuildingEntry[];
+  population?: PopulationEntry[];
+  techs?: TechEntry[];
+  modifiers?: ModifierEntry[];
+  army?: ArmyEntry[];
+  armyOrder?: ArmyOrder;
+  enemies?: EnemyEntry[];
+  diplomacy?: DiplomacyEntry[];
+  stocks?: StockEntry[];
+  prayers?: PrayerEntry[];
+  spells?: string[];
+  rewards?: RewardEntry[];
+  flag?: number;
+  flagb?: number;
+  flagd?: number;
+  dfc?: number;
+  boss?: string;
+  donation?: number;
   [key: string]: unknown;
 }
 

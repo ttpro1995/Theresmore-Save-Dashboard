@@ -1,5 +1,5 @@
 import { 
-  GameData, 
+  GameDataSection,
   ProcessedResource, 
   ProcessedPopulation, 
   ProcessedBuilding, 
@@ -8,19 +8,21 @@ import {
 } from '../types';
 
 // Extract resources with production/consumption data
-export function extractResources(data: GameData): ProcessedResource[] {
+export function extractResources(data: GameDataSection): ProcessedResource[] {
+  if (!data.resources || !Array.isArray(data.resources)) return [];
   return data.resources.map(resource => ({
     id: resource.id,
     name: formatResourceName(resource.id),
     value: resource.value,
     production: calculateProduction(resource),
     consumption: calculateConsumption(resource),
-    percentage: resource.perc
+    percentage: resource.perc || 0
   }));
 }
 
 // Extract population by type
-export function extractPopulation(data: GameData): ProcessedPopulation[] {
+export function extractPopulation(data: GameDataSection): ProcessedPopulation[] {
+  if (!data.population || !Array.isArray(data.population)) return [];
   const totalPopulation = data.population.reduce((sum, pop) => sum + pop.value, 0);
   
   return data.population.map(pop => ({
@@ -32,7 +34,8 @@ export function extractPopulation(data: GameData): ProcessedPopulation[] {
 }
 
 // Extract buildings with counts
-export function extractBuildings(data: GameData): ProcessedBuilding[] {
+export function extractBuildings(data: GameDataSection): ProcessedBuilding[] {
+  if (!data.buildings || !Array.isArray(data.buildings)) return [];
   return data.buildings
     .filter(building => building.value > 0)
     .map(building => ({
@@ -43,7 +46,8 @@ export function extractBuildings(data: GameData): ProcessedBuilding[] {
 }
 
 // Extract technologies with research status
-export function extractTechnologies(data: GameData): ProcessedTechnology[] {
+export function extractTechnologies(data: GameDataSection): ProcessedTechnology[] {
+  if (!data.techs || !Array.isArray(data.techs)) return [];
   return data.techs.map(tech => ({
     id: tech.id,
     name: formatTechName(tech.id),
@@ -52,18 +56,20 @@ export function extractTechnologies(data: GameData): ProcessedTechnology[] {
 }
 
 // Extract army composition
-export function extractArmy(data: GameData): ProcessedArmyUnit[] {
+export function extractArmy(data: GameDataSection): ProcessedArmyUnit[] {
+  if (!data.army || !Array.isArray(data.army)) return [];
   return data.army.map(unit => ({
     id: unit.id,
     name: formatUnitName(unit.id),
     total: unit.value,
-    away: unit.away,
-    home: unit.value - unit.away
+    away: unit.away || 0,
+    home: unit.value - (unit.away || 0)
   }));
 }
 
 // Extract modifiers by type
-export function extractModifiers(data: GameData) {
+export function extractModifiers(data: GameDataSection) {
+  if (!data.modifiers || !Array.isArray(data.modifiers)) return {};
   const modifiersByType: Record<string, typeof data.modifiers> = {};
   data.modifiers.forEach(mod => {
     if (!modifiersByType[mod.type]) {

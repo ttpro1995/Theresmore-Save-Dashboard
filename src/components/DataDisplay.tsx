@@ -7,16 +7,19 @@ import BuildingsChart from './BuildingsChart';
 import TechnologiesGrid from './TechnologiesGrid';
 import ArmyComposition from './ArmyComposition';
 import { extractResources, extractPopulation, extractBuildings, extractTechnologies, extractArmy } from '../utils/dataExtractors';
-import { GameData } from '../types';
+import { GameDataSection, SaveFileData } from '../types';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
 export default function DataDisplay() {
   const { state, settings } = useSaveFile();
 
-  // Cast parsed data to GameData type
+  // Extract game data from the save file array structure: [version, indexMappings, gameData]
   const gameData = useMemo(() => {
-    return state.parsed as GameData | null;
+    const parsed = state.parsed as SaveFileData | null;
+    if (!parsed || !Array.isArray(parsed) || parsed.length < 3) return null;
+    // The game data is the third element (index 2) of the save file array
+    return parsed[2] as GameDataSection;
   }, [state.parsed]);
 
   // Extract game-specific data for visualization
