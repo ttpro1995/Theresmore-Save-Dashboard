@@ -1,14 +1,15 @@
 // Save file data types
 
-// The save file is an array with 7 elements
+// The save file is an array with elements:
+// [version, mappings, gameData, rewards, stats, legacies, ...]
 export type SaveFileData = [
   string,              // Version number (e.g., "0.63")
-  GameDataSection,     // Main game data object
-  BuildingRecord[],    // Building construction history
+  unknown,             // Index mappings
+  GameDataSection,     // Main game data object (resources, buildings, techs, etc.)
+  BuildingRecord[],    // Building/achievement construction history
   Statistic[],         // Player statistics
-  ItemRecord[],        // Item acquisition history
-  BattleRecord[],      // Combat history log
-  unknown              // Additional data (type varies)
+  LegacyRecord[],     // Unlocked legacies
+  ...unknown[]        // Additional data
 ];
 
 // Game data section (second element of save array)
@@ -62,6 +63,12 @@ export interface Statistic {
 
 // Item history record
 export interface ItemRecord {
+  id: string;
+  date: number;  // Unix timestamp
+}
+
+// Legacy record (unlocked legacies)
+export interface LegacyRecord {
   id: string;
   date: number;  // Unix timestamp
 }
@@ -268,6 +275,12 @@ export interface ProcessedTechnology {
   id: string;
   name: string;
   researched: boolean;
+}
+
+export interface ProcessedLegacy {
+  id: string;
+  name: string;
+  date: number;
 }
 
 export interface ProcessedArmyUnit {

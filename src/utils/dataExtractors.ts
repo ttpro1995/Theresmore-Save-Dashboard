@@ -4,7 +4,9 @@ import {
   ProcessedPopulation, 
   ProcessedBuilding, 
   ProcessedTechnology, 
-  ProcessedArmyUnit 
+  ProcessedArmyUnit,
+  ProcessedLegacy,
+  LegacyRecord
 } from '../types';
 
 // Extract resources with production/consumption data
@@ -74,6 +76,16 @@ export function extractTechnologies(data: GameDataSection): ProcessedTechnology[
   }));
 }
 
+// Extract unlocked legacies
+export function extractLegacies(legacies: LegacyRecord[]): ProcessedLegacy[] {
+  if (!legacies || !Array.isArray(legacies)) return [];
+  return legacies.map(legacy => ({
+    id: legacy.id,
+    name: formatLegacyName(legacy.id),
+    date: legacy.date
+  }));
+}
+
 // Extract army composition
 export function extractArmy(data: GameDataSection): ProcessedArmyUnit[] {
   if (!data.army || !Array.isArray(data.army)) return [];
@@ -128,6 +140,18 @@ function formatUnitName(id: string): string {
   return id.split('_').map(word => 
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ');
+}
+
+function formatLegacyName(id: string): string {
+  // Handle legacy-specific naming conventions
+  // Examples: charism -> Charism, charism_II -> Charism II, powered_weapons_III -> Powered Weapons III
+  return id.split('_').map((word, index) => {
+    // Roman numerals
+    if (/^(I|II|III|IV|V|VI|VII|VIII|IX|X)$/.test(word)) {
+      return word;
+    }
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  }).join(' ');
 }
 
 // Helper functions for calculation

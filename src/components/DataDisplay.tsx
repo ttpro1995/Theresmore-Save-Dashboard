@@ -6,7 +6,7 @@ import PopulationChart from './PopulationChart';
 import BuildingsChart from './BuildingsChart';
 import TechnologiesGrid from './TechnologiesGrid';
 import ArmyComposition from './ArmyComposition';
-import { extractResources, extractPopulation, extractBuildings, extractTechnologies, extractArmy } from '../utils/dataExtractors';
+import { extractResources, extractPopulation, extractBuildings, extractTechnologies, extractArmy, extractLegacies } from '../utils/dataExtractors';
 import { GameDataSection, SaveFileData } from '../types';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
@@ -14,12 +14,20 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'
 export default function DataDisplay() {
   const { state, settings } = useSaveFile();
 
-  // Extract game data from the save file array structure: [version, indexMappings, gameData]
+  // Extract game data from the save file array structure
   const gameData = useMemo(() => {
     const parsed = state.parsed as SaveFileData | null;
     if (!parsed || !Array.isArray(parsed) || parsed.length < 3) return null;
+    // Based on decoded data structure: [version, mappings, gameData, rewards, stats, legacies]
     // The game data is the third element (index 2) of the save file array
     return parsed[2] as GameDataSection;
+  }, [state.parsed]);
+
+  // Extract legacies from the save file (index 5 based on decoded data structure)
+  const legaciesData = useMemo(() => {
+    const parsed = state.parsed as SaveFileData | null;
+    if (!parsed || !Array.isArray(parsed) || parsed.length < 6) return [];
+    return extractLegacies(parsed[5] as any);
   }, [state.parsed]);
 
   // Extract game-specific data for visualization
@@ -302,6 +310,33 @@ export default function DataDisplay() {
                 Technologies
               </h2>
               <TechnologiesGrid data={technologiesData} />
+            </section>
+          )}
+
+          {/* Legacies Section */}
+          {legaciesData.length > 0 && (
+            <section className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+                Unlocked Legacies ({legaciesData.length})
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {legaciesData.map((legacy) => (
+                  <div 
+                    key={legacy.id} 
+                    className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4"
+                  >
+                    <div className="flex items-center gap-2">
+                      <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span className="font-medium text-green-900 dark:text-green-100">{legacy.name}</span>
+                    </div>
+                    <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                      Unlocked: {new Date(legacy.date).toLocaleDateString()}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </section>
           )}
 
