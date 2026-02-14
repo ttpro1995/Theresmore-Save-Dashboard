@@ -285,16 +285,6 @@ export default function DataDisplay() {
             </section>
           )}
 
-          {/* Technologies Section */}
-          {technologiesData.length > 0 && (
-            <section className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
-                Technologies
-              </h2>
-              <TechnologiesGrid data={technologiesData} />
-            </section>
-          )}
-
           {/* Army Section */}
           {armyData.length > 0 && (
             <section className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
@@ -302,6 +292,16 @@ export default function DataDisplay() {
                 Army Composition
               </h2>
               <ArmyComposition data={armyData} />
+            </section>
+          )}
+
+          {/* Technologies Section */}
+          {technologiesData.length > 0 && (
+            <section className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+                Technologies
+              </h2>
+              <TechnologiesGrid data={technologiesData} />
             </section>
           )}
 

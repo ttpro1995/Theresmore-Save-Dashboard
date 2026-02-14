@@ -27,7 +27,7 @@ const initialState: SaveFileState = {
 };
 
 const initialSettings: AppSettings = {
-  viewMode: 'raw',
+  viewMode: 'visualization',
   autoDecode: true,
   theme: 'light',
 };
