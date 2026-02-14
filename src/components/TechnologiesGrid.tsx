@@ -58,7 +58,7 @@ export default function TechnologiesGrid({ data }: TechnologiesGridProps) {
                 : 'border-gray-300 bg-gray-50 dark:bg-gray-800 dark:border-gray-600'
             }`}
           >
-            <h3 className="font-medium text-sm">{tech.name}</h3>
+            <h3 className="font-medium text-sm text-gray-900 dark:text-white">{tech.name}</h3>
             <p className="text-xs text-gray-500 dark:text-gray-400">
               {tech.researched ? 'Researched' : 'Not Researched'}
             </p>
