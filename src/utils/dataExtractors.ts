@@ -101,7 +101,7 @@ export function extractArmy(data: GameDataSection): ProcessedArmyUnit[] {
 // Extract modifiers by type
 export function extractModifiers(data: GameDataSection) {
   if (!data.modifiers || !Array.isArray(data.modifiers)) return {};
-  const modifiersByType: Record<string, typeof data.modifiers> = {};
+  const modifiersByType: Record<string, any[]> = {};
   data.modifiers.forEach(mod => {
     if (!modifiersByType[mod.type]) {
       modifiersByType[mod.type] = [];
@@ -145,7 +145,7 @@ function formatUnitName(id: string): string {
 function formatLegacyName(id: string): string {
   // Handle legacy-specific naming conventions
   // Examples: charism -> Charism, charism_II -> Charism II, powered_weapons_III -> Powered Weapons III
-  return id.split('_').map((word, index) => {
+  return id.split('_').map(word => {
     // Roman numerals
     if (/^(I|II|III|IV|V|VI|VII|VIII|IX|X)$/.test(word)) {
       return word;
