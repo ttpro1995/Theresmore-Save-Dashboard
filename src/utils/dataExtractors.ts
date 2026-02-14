@@ -25,10 +25,19 @@ export function extractPopulation(data: GameDataSection): ProcessedPopulation[] 
   if (!data.population || !Array.isArray(data.population)) return [];
   const totalPopulation = data.population.reduce((sum, pop) => sum + pop.value, 0);
   
+  // Get capacity from caps if available
+  const capsMap: Record<string, number> = {};
+  if (data.caps && Array.isArray(data.caps)) {
+    data.caps.forEach(cap => {
+      capsMap[cap.id] = cap.value;
+    });
+  }
+  
   return data.population.map(pop => ({
     id: pop.id,
     name: formatProfessionName(pop.id),
     count: pop.value,
+    capacity: capsMap[pop.id] || 0,
     percentage: totalPopulation > 0 ? parseFloat(((pop.value / totalPopulation) * 100).toFixed(1)) : 0
   }));
 }

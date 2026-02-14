@@ -253,6 +253,7 @@ export interface ProcessedPopulation {
   id: string;
   name: string;
   count: number;
+  capacity: number;
   percentage: number;
 }
 
